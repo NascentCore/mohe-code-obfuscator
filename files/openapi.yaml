@@ -1,0 +1,408 @@
+openapi: "3.0.0"
+info:
+  title: Workbench Files API
+  version: 0.3.14
+servers:
+  - url: http://127.0.0.1:9001/
+    description: Local development server
+  - url: http://api.dev.mahanova.com/workbench-api/
+
+tags:
+  - name: internal
+  - name: deprecation
+
+paths:
+  /v1/files:
+    get:
+      summary: List all files of the user
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Page number
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+          description: Number of items per page
+        - in: query
+          name: order_by
+          schema:
+            type: string
+            enum:
+              - created_at
+              - updated_at
+            default: updated_at
+          description: Column name to order by
+        - in: query
+          name: order
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+          description: Order direction
+
+      responses:
+        "200":
+          description: List of files
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileListResponse"
+
+    post:
+      summary: Upload files or create files from local path
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                extra:
+                  type: object
+                  description: Extra data, any valid JSON. Will be applied to all files
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LocalFileCreateRequest"
+
+      responses:
+        "200":
+          description: List of created files
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/File"
+
+  /v1/files/details:
+    post:
+      summary: Get details of multiple files
+      tags:
+        - deprecation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FileDetailsRequest"
+
+      responses:
+        "200":
+          description: List of file details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileDetailsResponse"
+
+  /v1/files/{file_id}:
+    get:
+      summary: Get file details
+      parameters:
+        - in: path
+          name: file_id
+          schema:
+            type: string
+          required: true
+          description: File ID
+        - in: query
+          name: authorization_context
+          schema:
+            $ref: "#/components/schemas/AuthorizationContext"
+          required: false
+      responses:
+        "200":
+          description: File details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/File"
+
+    put:
+      summary: Update file details
+      parameters:
+        - in: path
+          name: file_id
+          schema:
+            type: string
+          required: true
+          description: File ID
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FileUpdateRequest"
+
+      responses:
+        "200":
+          description: Updated file details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/File"
+
+    delete:
+      summary: Delete file
+      parameters:
+        - in: path
+          name: file_id
+          schema:
+            type: string
+          required: true
+          description: File ID
+
+      responses:
+        "200":
+          description: File deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/File"
+
+  /v1/files/{file_id}/content:
+    get:
+      summary: The binary content of the file
+      parameters:
+        - in: path
+          name: file_id
+          schema:
+            type: string
+          required: true
+          description: File ID
+        - in: query
+          name: authorization_context
+          schema:
+            $ref: "#/components/schemas/AuthorizationContext"
+          required: false
+      responses:
+        "200":
+          description: File content
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+  /v1/files/{file_id}/soft-delete:
+    post:
+      summary: Soft delete file
+      parameters:
+        - in: path
+          name: file_id
+          schema:
+            type: string
+          required: true
+          description: File ID
+
+      responses:
+        "200":
+          description: File soft deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/File"
+
+  /v1/internal/files/{file_id}/content:
+    get:
+      summary: The binary content of the file
+      tags:
+        - internal
+      parameters:
+        - in: path
+          name: file_id
+          schema:
+            type: string
+          required: true
+          description: File ID
+        - in: query
+          name: authorization_context
+          schema:
+            $ref: "#/components/schemas/AuthorizationContext"
+          required: false
+
+      responses:
+        "200":
+          description: File content
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+  /v1/files/batch-get:
+    post:
+      summary: Get a list of files (with or without context)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FileBatchGet"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileBatchGetResponse"
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: string
+
+    File:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        filename:
+          type: string
+        path:
+          type: string
+        size:
+          type: integer
+          description: File size in bytes
+        extension:
+          type: string
+          description: File extension name
+          example: jpg
+        extra:
+          type: object
+          description: Extra data, any valid JSON
+        created_at:
+          type: integer
+          description: Unix time
+        updated_at:
+          type: integer
+          description: Unix time
+        deleted_at:
+          type: integer
+          description: Unix time. Null if not deleted, otherwise the time of soft deletion
+
+    LocalFileCreateRequest:
+      type: object
+      properties:
+        path:
+          type: string
+          description: The path to the file
+        filename:
+          type: string
+          description: Overwrite the filename if provided
+        extra:
+          type: object
+          description: Extra data, any valid JSON
+      required:
+        - path
+
+    FileUpdateRequest:
+      type: object
+      properties:
+        extra:
+          type: object
+          description: Extra data, any valid JSON
+
+    FileListResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total number of files
+        pages:
+          type: integer
+          description: Total number of pages
+        page:
+          type: integer
+          description: Current page number
+        page_size:
+          type: integer
+          description: Number of items per page
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/File"
+
+    FileDetailsRequest:
+      type: object
+      properties:
+        file_ids:
+          type: array
+          items:
+            type: string
+          description: List of file IDs
+
+    FileDetailsResponse:
+      type: object
+      properties:
+        file:
+          $ref: "#/components/schemas/File"
+
+    AuthorizationContext:
+      type: object
+      properties:
+        base_id:
+          type: string
+          format: uuid
+        folder_id:
+          type: string
+          format: uuid
+        attachment_id:
+          type: string
+          format: uuid
+      required:
+        - attachment_id
+
+    FileBatchGet:
+      type: array
+      items:
+        type: object
+        properties:
+          file_id:
+            type: string
+            format: uuid
+          base_id:
+            type: string
+            format: uuid
+          folder_id:
+            type: string
+            format: uuid
+          attachment_id:
+            type: string
+            format: uuid
+        required:
+          - file_id
+
+    FileBatchGetResponse:
+      type: object
+      properties:
+        file:
+          $ref: "#/components/schemas/File"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

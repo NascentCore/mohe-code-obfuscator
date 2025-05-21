@@ -1,0 +1,31 @@
+{
+  "name": "workbench-docs",
+  "version": "0.1.5",
+  "main": "app.ts",
+  "license": "Proprietary",
+  "scripts": {
+    "start": "ts-node src/app.ts",
+    "dev": "ts-node-dev --respawn src/app.ts",
+    "migrate": "typeorm-ts-node-commonjs migration:run -d src/data-source.ts"
+  },
+  "dependencies": {
+    "@fastify/type-provider-typebox": "^5.1.0",
+    "@lexical/headless": "^0.30.0",
+    "@lexical/html": "^0.30.0",
+    "@lexical/markdown": "^0.30.0",
+    "fastify": "^5.2.1",
+    "jsdom": "^26.1.0",
+    "lexical": "^0.30.0",
+    "marked": "^15.0.8",
+    "pg": "^8.13.1",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.20"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^22.13.1",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.7.3"
+  }
+}
