@@ -25,7 +25,7 @@ class DBConfig:
     dialect: str = os.getenv("DB_DIALECT", "postgresql")
     driver: str = os.getenv("DB_DRIVER", "psycopg")
     host: str = os.getenv("DB_HOST", "localhost")
-    port: int = int(os.getenv("DB_PORT", 5432))
+    port: int = int(os.getenv("DB_PORT", 5433))
     user: str = os.getenv("DB_USER", "postgres")
     password: str = os.getenv("DB_PASSWORD", "postgres")
     name: str = os.getenv("DB_NAME", "workbench-files")
@@ -43,7 +43,7 @@ class DBPoolConfig:
 
 @dataclass
 class FilesConfig:
-    base_path: str = os.getenv("BASE_PATH", "/data/workbench-files")
+    base_path: str = os.getenv("BASE_PATH", "./data/workbench-files")
 
     @property
     def allowed_extensions(self) -> list[str]:

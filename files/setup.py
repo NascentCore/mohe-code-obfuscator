@@ -22,11 +22,13 @@ def get_python_files():
         for file in files:
             if file.endswith(".py") and file != "__init__.py":
                 module_path = os.path.join(root, file)
-                module_name = os.path.splitext(os.path.relpath(module_path, "src"))[0].replace("/", ".")
+                rel_path = os.path.relpath(module_path, "src")
+                module_name = os.path.splitext(rel_path)[0].replace(os.sep, ".")
+                full_module_name = f"{module_name}"
                 if module_name in skip_modules:
                     print(f"🛑 Skipping module: {module_name}")
                     continue
-                python_files.append((module_name, module_path, os.path.dirname(module_path)))
+                python_files.append((full_module_name, module_path, os.path.dirname(module_path)))
     return python_files
 
 setup(

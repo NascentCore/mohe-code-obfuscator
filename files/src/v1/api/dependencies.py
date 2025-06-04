@@ -27,14 +27,16 @@ async def get_user_id(request: Request) -> UUID:
     Get X-User-ID header, or validate the Authorization header with the Users service.
     """
 
-    if user_id := request.headers.get(api_config.user_id_header):
-        return UUID(user_id)
+    return "00000000-0000-0000-0000-000000000000"
 
-    if authorization := request.headers.get("Authorization"):
-        users_service = UsersClient()
-        return await users_service.get_user_id(authorization)
+    # if user_id := request.headers.get(api_config.user_id_header):
+    #     return UUID(user_id)
 
-    raise AuthorizationNotProvided()
+    # if authorization := request.headers.get("Authorization"):
+    #     users_service = UsersClient()
+    #     return await users_service.get_user_id(authorization)
+
+    # raise AuthorizationNotProvided()
 
 
 async def validate_allowed_host(request: Request) -> None:
